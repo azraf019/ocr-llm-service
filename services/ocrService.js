@@ -1,31 +1,27 @@
 // services/ocrService.js
+const tesseract = require("node-tesseract-ocr");
 
-const fs = require('fs/promises');
-const path = require('path');
-const FormData = require('form-data');
-const axios = require('axios');
-const config = require('../config');
+const config = {
+  lang: "eng",
+  oem: 1,
+  psm: 3,
+};
 
 /**
- * Perform OCR on a PNG image using PaddleOCR API
+ * Perform OCR on a PNG image using Tesseract
  * @param {string} imagePath
  * @returns {Promise<string>} Extracted text
  */
 async function performOcr(imagePath) {
-    const fileBuffer = await fs.readFile(imagePath);
-    const formData = new FormData();
-    formData.append('image', fileBuffer, {
-        filename: path.basename(imagePath),
-        contentType: 'image/png',
-    });
-    const response = await axios.post(config.paddleOcrUrl, formData, {
-        headers: formData.getHeaders(),
-        timeout: 30000
-    });
-    if (response.data && Array.isArray(response.data.results)) {
-        return response.data.results.map(line => line.text).join('\n');
-    }
-    return '';
+  try {
+    console.log(`Performing OCR on ${imagePath}...`);
+    const text = await tesseract.recognize(imagePath, config);
+    console.log("OCR successful.");
+    return text;
+  } catch (error) {
+    console.error("Error during Tesseract OCR:", error.message);
+    throw new Error("Tesseract OCR process failed.");
+  }
 }
 
 module.exports = { performOcr }; 

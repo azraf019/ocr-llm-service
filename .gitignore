@@ -1,0 +1,8 @@
+# Dependencies
+/node_modules
+
+# Local Environment
+.env
+
+# Project Source Code Cloned
+/PaddleOCR/ 
